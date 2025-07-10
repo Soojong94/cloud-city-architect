@@ -34,7 +34,6 @@ const KubernetesBuilding = ({ position, onClick }: { position: [number, number, 
       onClick={onClick}
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
-      style={{ cursor: hovered ? 'pointer' : 'default' }}
     >
       {/* Main building with stacked container design */}
       <Box args={[6, 4, 6]} position={[0, 2, 0]} castShadow receiveShadow>

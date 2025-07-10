@@ -34,7 +34,6 @@ const AWSBuilding = ({ position, onClick }: { position: [number, number, number]
       onClick={onClick}
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
-      style={{ cursor: hovered ? 'pointer' : 'default' }}
     >
       {/* Main building */}
       <Box args={[6, 14, 6]} position={[0, 7, 0]} castShadow receiveShadow>

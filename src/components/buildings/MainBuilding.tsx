@@ -39,7 +39,6 @@ const MainBuilding = ({ position, onClick }: { position: [number, number, number
       onClick={onClick}
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
-      style={{ cursor: hovered ? 'pointer' : 'default' }}
     >
       {/* Main building structure */}
       <Box args={[8, 16, 8]} position={[0, 8, 0]} castShadow receiveShadow>

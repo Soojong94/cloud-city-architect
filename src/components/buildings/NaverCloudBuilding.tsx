@@ -34,7 +34,6 @@ const NaverCloudBuilding = ({ position, onClick }: { position: [number, number, 
       onClick={onClick}
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
-      style={{ cursor: hovered ? 'pointer' : 'default' }}
     >
       {/* Main building */}
       <Box args={[6, 10, 6]} position={[0, 5, 0]} castShadow receiveShadow>
