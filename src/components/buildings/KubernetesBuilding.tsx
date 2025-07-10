@@ -1,19 +1,40 @@
 
 import React, { useRef, useState } from 'react';
+import { useFrame } from '@react-three/fiber';
 import { Box, Cylinder } from '@react-three/drei';
 import * as THREE from 'three';
 
 const KubernetesBuilding = ({ position, onClick }: { position: [number, number, number], onClick: () => void }) => {
   const [hovered, setHovered] = useState(false);
+  const buildingRef = useRef<THREE.Group>(null);
   
   console.log('KubernetesBuilding mounting with position:', position);
   
+  useFrame(() => {
+    // Add subtle hover glow effect
+    if (buildingRef.current && hovered) {
+      buildingRef.current.children.forEach((child) => {
+        if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
+          child.material.emissiveIntensity = 0.1;
+        }
+      });
+    } else if (buildingRef.current) {
+      buildingRef.current.children.forEach((child) => {
+        if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
+          child.material.emissiveIntensity = 0;
+        }
+      });
+    }
+  });
+  
   return (
     <group 
+      ref={buildingRef}
       position={position} 
       onClick={onClick}
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
+      style={{ cursor: hovered ? 'pointer' : 'default' }}
     >
       {/* Main building with stacked container design */}
       <Box args={[6, 4, 6]} position={[0, 2, 0]} castShadow receiveShadow>
@@ -21,6 +42,8 @@ const KubernetesBuilding = ({ position, onClick }: { position: [number, number, 
           color={hovered ? "#4d7aed" : "#326ce5"} 
           metalness={0.3}
           roughness={0.7}
+          emissive="#326ce5"
+          emissiveIntensity={hovered ? 0.1 : 0}
         />
       </Box>
       
@@ -29,6 +52,8 @@ const KubernetesBuilding = ({ position, onClick }: { position: [number, number, 
           color={hovered ? "#4d7aed" : "#326ce5"} 
           metalness={0.3}
           roughness={0.7}
+          emissive="#326ce5"
+          emissiveIntensity={hovered ? 0.1 : 0}
         />
       </Box>
       
@@ -37,6 +62,8 @@ const KubernetesBuilding = ({ position, onClick }: { position: [number, number, 
           color={hovered ? "#4d7aed" : "#326ce5"} 
           metalness={0.3}
           roughness={0.7}
+          emissive="#326ce5"
+          emissiveIntensity={hovered ? 0.1 : 0}
         />
       </Box>
       
@@ -46,6 +73,8 @@ const KubernetesBuilding = ({ position, onClick }: { position: [number, number, 
           color="#ffffff" 
           metalness={0.8}
           roughness={0.2}
+          emissive="#ffffff"
+          emissiveIntensity={hovered ? 0.2 : 0}
         />
       </Cylinder>
       
@@ -63,7 +92,11 @@ const KubernetesBuilding = ({ position, onClick }: { position: [number, number, 
             ]}
             rotation={[0, angle, 0]}
           >
-            <meshStandardMaterial color="#ffffff" />
+            <meshStandardMaterial 
+              color="#ffffff"
+              emissive="#ffffff"
+              emissiveIntensity={hovered ? 0.2 : 0}
+            />
           </Box>
         );
       })}
@@ -85,7 +118,7 @@ const KubernetesBuilding = ({ position, onClick }: { position: [number, number, 
             <meshStandardMaterial 
               color="#4a90e2" 
               emissive="#4a90e2"
-              emissiveIntensity={0.3}
+              emissiveIntensity={hovered ? 0.5 : 0.3}
             />
           </Box>
         );

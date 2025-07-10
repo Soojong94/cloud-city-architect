@@ -1,4 +1,3 @@
-
 import React, { Suspense, useState, useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Text, Box, Plane, Environment, PerspectiveCamera } from '@react-three/drei';
@@ -10,6 +9,8 @@ import NaverCloudBuilding from '../components/buildings/NaverCloudBuilding';
 import KTCloudBuilding from '../components/buildings/KTCloudBuilding';
 import ThreeErrorBoundary from '../components/ThreeErrorBoundary';
 import TestScene from '../components/TestScene';
+import InfoPanel from '../components/InfoPanel';
+import { useBuildingData } from '../hooks/useBuildingData';
 
 // Ground component with subtle texture
 const Ground = () => {
@@ -67,7 +68,7 @@ const Scene = () => {
   
   const handleBuildingClick = (buildingName: string) => {
     console.log(`Clicked on ${buildingName} building`);
-    // TODO: Add modal or info panel for each building
+    // This will be handled by the parent component
   };
 
   // For debugging - you can toggle this in console: window.toggleTestScene()
@@ -107,14 +108,12 @@ const Scene = () => {
       {/* Ground */}
       <Ground />
       
-      {/* Buildings positioned in a circle - start with just main building */}
+      {/* Buildings positioned in a circle */}
       <MainBuilding 
         position={[0, 0, 0]} 
         onClick={() => handleBuildingClick('Main')} 
       />
       
-      {/* Gradually add other buildings - uncomment one by one for testing */}
-      {/*
       <AWSBuilding 
         position={[14, 0, 14]} 
         onClick={() => handleBuildingClick('AWS')} 
@@ -134,7 +133,6 @@ const Scene = () => {
         position={[-14, 0, -14]} 
         onClick={() => handleBuildingClick('KT Cloud')} 
       />
-      */}
       
       {/* Reduced floating elements to not interfere with buildings */}
       <FloatingElement position={[25, 8, 0]} color="#3b82f6" scale={0.6} />
@@ -194,6 +192,9 @@ const LoadingScreen = () => (
 const Index = () => {
   const [showWelcome, setShowWelcome] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [selectedBuilding, setSelectedBuilding] = useState<string | null>(null);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const { getBuildingInfo } = useBuildingData();
 
   console.log('Index component mounting');
 
@@ -205,6 +206,81 @@ const Index = () => {
 
     return () => clearTimeout(timer);
   }, []);
+
+  const handleBuildingClick = (buildingName: string) => {
+    console.log(`Building clicked: ${buildingName}`);
+    setSelectedBuilding(buildingName);
+    setIsPanelOpen(true);
+  };
+
+  const handleClosePanel = () => {
+    setIsPanelOpen(false);
+    setTimeout(() => {
+      setSelectedBuilding(null);
+    }, 300); // Wait for animation to complete
+  };
+
+  // Enhanced Scene component that can handle clicks
+  const InteractiveScene = () => {
+    return (
+      <>
+        <Environment preset="night" />
+        
+        {/* Enhanced Lighting for better shadows */}
+        <ambientLight intensity={0.3} />
+        <directionalLight 
+          position={[20, 20, 10]} 
+          intensity={1.2} 
+          castShadow
+          shadow-mapSize-width={4096}
+          shadow-mapSize-height={4096}
+          shadow-camera-near={0.5}
+          shadow-camera-far={100}
+          shadow-camera-left={-50}
+          shadow-camera-right={50}
+          shadow-camera-top={50}
+          shadow-camera-bottom={-50}
+        />
+        <pointLight position={[-15, 15, -15]} intensity={0.4} color="#6366f1" />
+        <pointLight position={[15, 15, 15]} intensity={0.4} color="#8b5cf6" />
+        
+        {/* Ground */}
+        <Ground />
+        
+        {/* Buildings positioned in a circle */}
+        <MainBuilding 
+          position={[0, 0, 0]} 
+          onClick={() => handleBuildingClick('Main')} 
+        />
+        
+        <AWSBuilding 
+          position={[14, 0, 14]} 
+          onClick={() => handleBuildingClick('AWS')} 
+        />
+        
+        <KubernetesBuilding 
+          position={[-14, 0, 14]} 
+          onClick={() => handleBuildingClick('Kubernetes')} 
+        />
+        
+        <NaverCloudBuilding 
+          position={[14, 0, -14]} 
+          onClick={() => handleBuildingClick('NAVER Cloud')} 
+        />
+        
+        <KTCloudBuilding 
+          position={[-14, 0, -14]} 
+          onClick={() => handleBuildingClick('KT Cloud')} 
+        />
+        
+        {/* Floating elements */}
+        <FloatingElement position={[25, 8, 0]} color="#3b82f6" scale={0.6} />
+        <FloatingElement position={[-25, 10, 0]} color="#8b5cf6" scale={0.8} />
+        <FloatingElement position={[0, 12, 25]} color="#06b6d4" scale={0.7} />
+        <FloatingElement position={[0, 9, -25]} color="#10b981" scale={0.7} />
+      </>
+    );
+  };
 
   return (
     <div className="h-screen w-full overflow-hidden bg-gray-900 relative">
@@ -220,7 +296,7 @@ const Index = () => {
           className="absolute inset-0"
         >
           <Suspense fallback={null}>
-            <Scene />
+            <InteractiveScene />
             <OrbitControls 
               enablePan={true}
               enableZoom={true}
@@ -233,6 +309,13 @@ const Index = () => {
           </Suspense>
         </Canvas>
       </ThreeErrorBoundary>
+
+      {/* Info Panel */}
+      <InfoPanel
+        isOpen={isPanelOpen}
+        onClose={handleClosePanel}
+        buildingInfo={selectedBuilding ? getBuildingInfo(selectedBuilding) : null}
+      />
 
       {/* Loading Screen */}
       {!isLoaded && <LoadingScreen />}

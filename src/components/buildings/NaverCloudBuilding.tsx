@@ -1,19 +1,40 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
 import { Box } from '@react-three/drei';
 import * as THREE from 'three';
 
 const NaverCloudBuilding = ({ position, onClick }: { position: [number, number, number], onClick: () => void }) => {
   const [hovered, setHovered] = useState(false);
+  const buildingRef = useRef<THREE.Group>(null);
   
   console.log('NaverCloudBuilding mounting with position:', position);
   
+  useFrame(() => {
+    // Add subtle hover glow effect
+    if (buildingRef.current && hovered) {
+      buildingRef.current.children.forEach((child) => {
+        if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
+          child.material.emissiveIntensity = 0.1;
+        }
+      });
+    } else if (buildingRef.current) {
+      buildingRef.current.children.forEach((child) => {
+        if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
+          child.material.emissiveIntensity = 0;
+        }
+      });
+    }
+  });
+  
   return (
     <group 
+      ref={buildingRef}
       position={position} 
       onClick={onClick}
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
+      style={{ cursor: hovered ? 'pointer' : 'default' }}
     >
       {/* Main building */}
       <Box args={[6, 10, 6]} position={[0, 5, 0]} castShadow receiveShadow>
@@ -21,15 +42,19 @@ const NaverCloudBuilding = ({ position, onClick }: { position: [number, number, 
           color={hovered ? "#2ed400" : "#1ec800"} 
           metalness={0.2}
           roughness={0.8}
+          emissive="#1ec800"
+          emissiveIntensity={hovered ? 0.1 : 0}
         />
       </Box>
       
       {/* Hexagonal top section */}
       <Box args={[5, 3, 5]} position={[0, 11.5, 0]} castShadow>
         <meshStandardMaterial 
-          color="#17a600" 
+          color={hovered ? "#20b000" : "#17a600"}
           metalness={0.3}
           roughness={0.6}
+          emissive="#17a600"
+          emissiveIntensity={hovered ? 0.1 : 0}
         />
       </Box>
       
@@ -46,7 +71,11 @@ const NaverCloudBuilding = ({ position, onClick }: { position: [number, number, 
               Math.sin(angle) * 2.2
             ]}
           >
-            <meshStandardMaterial color="#0f7d00" />
+            <meshStandardMaterial 
+              color={hovered ? "#189000" : "#0f7d00"}
+              emissive="#0f7d00"
+              emissiveIntensity={hovered ? 0.1 : 0}
+            />
           </Box>
         );
       })}
@@ -68,7 +97,7 @@ const NaverCloudBuilding = ({ position, onClick }: { position: [number, number, 
             <meshStandardMaterial 
               color="#4a90e2" 
               emissive="#4a90e2"
-              emissiveIntensity={0.3}
+              emissiveIntensity={hovered ? 0.5 : 0.3}
             />
           </Box>
         );
