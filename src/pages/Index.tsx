@@ -3,6 +3,11 @@ import React, { Suspense, useState, useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Text, Box, Plane, Environment, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
+import MainBuilding from '../components/buildings/MainBuilding';
+import AWSBuilding from '../components/buildings/AWSBuilding';
+import KubernetesBuilding from '../components/buildings/KubernetesBuilding';
+import NaverCloudBuilding from '../components/buildings/NaverCloudBuilding';
+import KTCloudBuilding from '../components/buildings/KTCloudBuilding';
 
 // Ground component with subtle texture
 const Ground = () => {
@@ -11,9 +16,10 @@ const Ground = () => {
   return (
     <Plane
       ref={meshRef}
-      args={[50, 50]}
+      args={[100, 100]}
       rotation={[-Math.PI / 2, 0, 0]}
       position={[0, -2, 0]}
+      receiveShadow
     >
       <meshStandardMaterial 
         color="#1a1a2e" 
@@ -53,54 +59,67 @@ const FloatingElement = ({ position, color, scale = 1 }: { position: [number, nu
 
 // 3D Scene component
 const Scene = () => {
+  const handleBuildingClick = (buildingName: string) => {
+    console.log(`Clicked on ${buildingName} building`);
+    // TODO: Add modal or info panel for each building
+  };
+
   return (
     <>
       <Environment preset="night" />
       
-      {/* Lighting */}
-      <ambientLight intensity={0.4} />
+      {/* Enhanced Lighting for better shadows */}
+      <ambientLight intensity={0.3} />
       <directionalLight 
-        position={[10, 10, 5]} 
-        intensity={0.8} 
+        position={[20, 20, 10]} 
+        intensity={1.2} 
         castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
+        shadow-mapSize-width={4096}
+        shadow-mapSize-height={4096}
+        shadow-camera-near={0.5}
+        shadow-camera-far={100}
+        shadow-camera-left={-50}
+        shadow-camera-right={50}
+        shadow-camera-top={50}
+        shadow-camera-bottom={-50}
       />
-      <pointLight position={[-10, 10, -10]} intensity={0.3} color="#6366f1" />
-      <pointLight position={[10, 10, 10]} intensity={0.3} color="#8b5cf6" />
+      <pointLight position={[-15, 15, -15]} intensity={0.4} color="#6366f1" />
+      <pointLight position={[15, 15, 15]} intensity={0.4} color="#8b5cf6" />
       
       {/* Ground */}
       <Ground />
       
-      {/* Floating 3D elements representing cloud services */}
-      <FloatingElement position={[-5, 2, -3]} color="#3b82f6" scale={0.8} />
-      <FloatingElement position={[5, 3, -2]} color="#8b5cf6" scale={1.2} />
-      <FloatingElement position={[0, 4, -5]} color="#06b6d4" scale={1} />
-      <FloatingElement position={[-3, 1, 2]} color="#10b981" scale={0.9} />
-      <FloatingElement position={[4, 2.5, 3]} color="#f59e0b" scale={1.1} />
+      {/* Buildings positioned in a circle */}
+      <MainBuilding 
+        position={[0, 0, 0]} 
+        onClick={() => handleBuildingClick('Main')} 
+      />
       
-      {/* 3D Text */}
-      <Text
-        position={[0, 1, 0]}
-        fontSize={1.5}
-        color="#ffffff"
-        anchorX="center"
-        anchorY="middle"
-        font="/fonts/Inter-Bold.woff"
-      >
-        CLOUD ARCHITECT
-      </Text>
+      <AWSBuilding 
+        position={[14, 0, 14]} 
+        onClick={() => handleBuildingClick('AWS')} 
+      />
       
-      <Text
-        position={[0, 0, 0]}
-        fontSize={0.8}
-        color="#a1a1aa"
-        anchorX="center"
-        anchorY="middle"
-        font="/fonts/Inter-Regular.woff"
-      >
-        클라우드 솔루션 전문가
-      </Text>
+      <KubernetesBuilding 
+        position={[-14, 0, 14]} 
+        onClick={() => handleBuildingClick('Kubernetes')} 
+      />
+      
+      <NaverCloudBuilding 
+        position={[14, 0, -14]} 
+        onClick={() => handleBuildingClick('NAVER Cloud')} 
+      />
+      
+      <KTCloudBuilding 
+        position={[-14, 0, -14]} 
+        onClick={() => handleBuildingClick('KT Cloud')} 
+      />
+      
+      {/* Reduced floating elements to not interfere with buildings */}
+      <FloatingElement position={[25, 8, 0]} color="#3b82f6" scale={0.6} />
+      <FloatingElement position={[-25, 10, 0]} color="#8b5cf6" scale={0.8} />
+      <FloatingElement position={[0, 12, 25]} color="#06b6d4" scale={0.7} />
+      <FloatingElement position={[0, 9, -25]} color="#10b981" scale={0.7} />
     </>
   );
 };
@@ -169,7 +188,7 @@ const Index = () => {
       {/* 3D Canvas */}
       <Canvas
         shadows
-        camera={{ position: [0, 5, 10], fov: 75 }}
+        camera={{ position: [25, 15, 25], fov: 60 }}
         onCreated={() => setIsLoaded(true)}
         className="absolute inset-0"
       >
@@ -179,9 +198,10 @@ const Index = () => {
             enablePan={true}
             enableZoom={true}
             enableRotate={true}
-            minDistance={5}
-            maxDistance={20}
-            maxPolarAngle={Math.PI / 2}
+            minDistance={15}
+            maxDistance={60}
+            maxPolarAngle={Math.PI / 2.2}
+            target={[0, 8, 0]}
           />
         </Suspense>
       </Canvas>
