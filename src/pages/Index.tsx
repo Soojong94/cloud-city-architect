@@ -1,6 +1,7 @@
+
 import React, { Suspense, useState, useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Text, Box, Plane, Environment, PerspectiveCamera } from '@react-three/drei';
+import { OrbitControls, Text, Box, Plane, Environment, PerspectiveCamera, Fog } from '@react-three/drei';
 import * as THREE from 'three';
 import MainBuilding from '../components/buildings/MainBuilding';
 import AWSBuilding from '../components/buildings/AWSBuilding';
@@ -10,6 +11,13 @@ import KTCloudBuilding from '../components/buildings/KTCloudBuilding';
 import ThreeErrorBoundary from '../components/ThreeErrorBoundary';
 import TestScene from '../components/TestScene';
 import InfoPanel from '../components/InfoPanel';
+import LoadingScreen from '../components/LoadingScreen';
+import SettingsPanel from '../components/SettingsPanel';
+import Tree from '../components/environment/Tree';
+import Streetlight from '../components/environment/Streetlight';
+import Plaza from '../components/environment/Plaza';
+import Bench from '../components/environment/Bench';
+import Road from '../components/environment/Road';
 import { useBuildingData } from '../hooks/useBuildingData';
 
 // Ground component with subtle texture
@@ -60,38 +68,20 @@ const FloatingElement = ({ position, color, scale = 1 }: { position: [number, nu
   );
 };
 
-// 3D Scene component
-const Scene = () => {
-  const [useTestScene, setUseTestScene] = useState(false);
+// Enhanced Scene component
+const EnhancedScene = ({ onBuildingClick }: { onBuildingClick: (buildingName: string) => void }) => {
+  console.log('EnhancedScene component mounting');
   
-  console.log('Scene component mounting, useTestScene:', useTestScene);
-  
-  const handleBuildingClick = (buildingName: string) => {
-    console.log(`Clicked on ${buildingName} building`);
-    // This will be handled by the parent component
-  };
-
-  // For debugging - you can toggle this in console: window.toggleTestScene()
-  useEffect(() => {
-    (window as any).toggleTestScene = () => {
-      setUseTestScene(prev => !prev);
-      console.log('Toggled test scene to:', !useTestScene);
-    };
-  }, [useTestScene]);
-
-  if (useTestScene) {
-    return <TestScene />;
-  }
-
   return (
     <>
       <Environment preset="night" />
+      <Fog attach="fog" args={['#1a1a2e', 30, 100]} />
       
-      {/* Enhanced Lighting for better shadows */}
-      <ambientLight intensity={0.3} />
+      {/* Enhanced Lighting */}
+      <ambientLight intensity={0.4} />
       <directionalLight 
         position={[20, 20, 10]} 
-        intensity={1.2} 
+        intensity={1.5} 
         castShadow
         shadow-mapSize-width={4096}
         shadow-mapSize-height={4096}
@@ -102,43 +92,77 @@ const Scene = () => {
         shadow-camera-top={50}
         shadow-camera-bottom={-50}
       />
-      <pointLight position={[-15, 15, -15]} intensity={0.4} color="#6366f1" />
-      <pointLight position={[15, 15, 15]} intensity={0.4} color="#8b5cf6" />
+      <pointLight position={[-15, 15, -15]} intensity={0.6} color="#6366f1" />
+      <pointLight position={[15, 15, 15]} intensity={0.6} color="#8b5cf6" />
       
-      {/* Ground */}
+      {/* Ground and Roads */}
       <Ground />
+      <Road />
       
-      {/* Buildings positioned in a circle */}
+      {/* Central Plaza */}
+      <Plaza position={[0, 0, 0]} />
+      
+      {/* Buildings */}
       <MainBuilding 
         position={[0, 0, 0]} 
-        onClick={() => handleBuildingClick('Main')} 
+        onClick={() => onBuildingClick('Main')} 
       />
       
       <AWSBuilding 
         position={[14, 0, 14]} 
-        onClick={() => handleBuildingClick('AWS')} 
+        onClick={() => onBuildingClick('AWS')} 
       />
       
       <KubernetesBuilding 
         position={[-14, 0, 14]} 
-        onClick={() => handleBuildingClick('Kubernetes')} 
+        onClick={() => onBuildingClick('Kubernetes')} 
       />
       
       <NaverCloudBuilding 
         position={[14, 0, -14]} 
-        onClick={() => handleBuildingClick('NAVER Cloud')} 
+        onClick={() => onBuildingClick('NAVER Cloud')} 
       />
       
       <KTCloudBuilding 
         position={[-14, 0, -14]} 
-        onClick={() => handleBuildingClick('KT Cloud')} 
+        onClick={() => onBuildingClick('KT Cloud')} 
       />
       
-      {/* Reduced floating elements to not interfere with buildings */}
-      <FloatingElement position={[25, 8, 0]} color="#3b82f6" scale={0.6} />
-      <FloatingElement position={[-25, 10, 0]} color="#8b5cf6" scale={0.8} />
-      <FloatingElement position={[0, 12, 25]} color="#06b6d4" scale={0.7} />
-      <FloatingElement position={[0, 9, -25]} color="#10b981" scale={0.7} />
+      {/* Trees */}
+      <Tree position={[8, 0, 8]} />
+      <Tree position={[-8, 0, 8]} />
+      <Tree position={[8, 0, -8]} />
+      <Tree position={[-8, 0, -8]} />
+      <Tree position={[20, 0, 0]} />
+      <Tree position={[-20, 0, 0]} />
+      <Tree position={[0, 0, 20]} />
+      <Tree position={[0, 0, -20]} />
+      <Tree position={[25, 0, 15]} />
+      <Tree position={[-25, 0, -15]} />
+      
+      {/* Streetlights */}
+      <Streetlight position={[7, 0, 7]} />
+      <Streetlight position={[-7, 0, 7]} />
+      <Streetlight position={[7, 0, -7]} />
+      <Streetlight position={[-7, 0, -7]} />
+      <Streetlight position={[21, 0, 0]} />
+      <Streetlight position={[-21, 0, 0]} />
+      <Streetlight position={[0, 0, 21]} />
+      <Streetlight position={[0, 0, -21]} />
+      
+      {/* Benches around plaza */}
+      <Bench position={[10, 0, 0]} rotation={[0, Math.PI/2, 0]} />
+      <Bench position={[-10, 0, 0]} rotation={[0, -Math.PI/2, 0]} />
+      <Bench position={[0, 0, 10]} rotation={[0, 0, 0]} />
+      <Bench position={[0, 0, -10]} rotation={[0, Math.PI, 0]} />
+      <Bench position={[7, 0, 7]} rotation={[0, Math.PI/4, 0]} />
+      <Bench position={[-7, 0, -7]} rotation={[0, -Math.PI/4, 0]} />
+      
+      {/* Floating elements - reduced to not clutter */}
+      <FloatingElement position={[30, 8, 0]} color="#3b82f6" scale={0.4} />
+      <FloatingElement position={[-30, 10, 0]} color="#8b5cf6" scale={0.4} />
+      <FloatingElement position={[0, 12, 30]} color="#06b6d4" scale={0.4} />
+      <FloatingElement position={[0, 9, -30]} color="#10b981" scale={0.4} />
     </>
   );
 };
@@ -178,33 +202,42 @@ const WelcomeOverlay = ({ isVisible, onClose }: { isVisible: boolean, onClose: (
   );
 };
 
-// Loading component
-const LoadingScreen = () => (
-  <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto mb-4"></div>
-      <p className="text-white/70">Loading 3D Experience...</p>
-    </div>
-  </div>
-);
-
 // Main component
 const Index = () => {
   const [showWelcome, setShowWelcome] = useState(true);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedBuilding, setSelectedBuilding] = useState<string | null>(null);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [language, setLanguage] = useState<'en' | 'ko'>('en');
   const { getBuildingInfo } = useBuildingData();
 
   console.log('Index component mounting');
 
   useEffect(() => {
-    // Auto-hide welcome overlay after 3 seconds
-    const timer = setTimeout(() => {
-      setShowWelcome(false);
-    }, 3000);
+    // Simulate loading time and hide welcome overlay
+    const loadingTimer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
 
-    return () => clearTimeout(timer);
+    const welcomeTimer = setTimeout(() => {
+      setShowWelcome(false);
+    }, 4000);
+
+    // Keyboard shortcuts
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsPanelOpen(false);
+        setTimeout(() => setSelectedBuilding(null), 300);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+
+    return () => {
+      clearTimeout(loadingTimer);
+      clearTimeout(welcomeTimer);
+      document.removeEventListener('keydown', handleKeyPress);
+    };
   }, []);
 
   const handleBuildingClick = (buildingName: string) => {
@@ -217,69 +250,7 @@ const Index = () => {
     setIsPanelOpen(false);
     setTimeout(() => {
       setSelectedBuilding(null);
-    }, 300); // Wait for animation to complete
-  };
-
-  // Enhanced Scene component that can handle clicks
-  const InteractiveScene = () => {
-    return (
-      <>
-        <Environment preset="night" />
-        
-        {/* Enhanced Lighting for better shadows */}
-        <ambientLight intensity={0.3} />
-        <directionalLight 
-          position={[20, 20, 10]} 
-          intensity={1.2} 
-          castShadow
-          shadow-mapSize-width={4096}
-          shadow-mapSize-height={4096}
-          shadow-camera-near={0.5}
-          shadow-camera-far={100}
-          shadow-camera-left={-50}
-          shadow-camera-right={50}
-          shadow-camera-top={50}
-          shadow-camera-bottom={-50}
-        />
-        <pointLight position={[-15, 15, -15]} intensity={0.4} color="#6366f1" />
-        <pointLight position={[15, 15, 15]} intensity={0.4} color="#8b5cf6" />
-        
-        {/* Ground */}
-        <Ground />
-        
-        {/* Buildings positioned in a circle */}
-        <MainBuilding 
-          position={[0, 0, 0]} 
-          onClick={() => handleBuildingClick('Main')} 
-        />
-        
-        <AWSBuilding 
-          position={[14, 0, 14]} 
-          onClick={() => handleBuildingClick('AWS')} 
-        />
-        
-        <KubernetesBuilding 
-          position={[-14, 0, 14]} 
-          onClick={() => handleBuildingClick('Kubernetes')} 
-        />
-        
-        <NaverCloudBuilding 
-          position={[14, 0, -14]} 
-          onClick={() => handleBuildingClick('NAVER Cloud')} 
-        />
-        
-        <KTCloudBuilding 
-          position={[-14, 0, -14]} 
-          onClick={() => handleBuildingClick('KT Cloud')} 
-        />
-        
-        {/* Floating elements */}
-        <FloatingElement position={[25, 8, 0]} color="#3b82f6" scale={0.6} />
-        <FloatingElement position={[-25, 10, 0]} color="#8b5cf6" scale={0.8} />
-        <FloatingElement position={[0, 12, 25]} color="#06b6d4" scale={0.7} />
-        <FloatingElement position={[0, 9, -25]} color="#10b981" scale={0.7} />
-      </>
-    );
+    }, 300);
   };
 
   return (
@@ -291,12 +262,16 @@ const Index = () => {
           camera={{ position: [25, 15, 25], fov: 60 }}
           onCreated={() => {
             console.log('Canvas created successfully');
-            setIsLoaded(true);
           }}
           className="absolute inset-0"
+          gl={{ 
+            antialias: true, 
+            alpha: false,
+            powerPreference: "high-performance"
+          }}
         >
           <Suspense fallback={null}>
-            <InteractiveScene />
+            <EnhancedScene onBuildingClick={handleBuildingClick} />
             <OrbitControls 
               enablePan={true}
               enableZoom={true}
@@ -305,6 +280,8 @@ const Index = () => {
               maxDistance={60}
               maxPolarAngle={Math.PI / 2.2}
               target={[0, 8, 0]}
+              enableDamping={true}
+              dampingFactor={0.05}
             />
           </Suspense>
         </Canvas>
@@ -318,20 +295,23 @@ const Index = () => {
       />
 
       {/* Loading Screen */}
-      {!isLoaded && <LoadingScreen />}
+      <LoadingScreen isVisible={isLoading} />
 
       {/* Welcome Overlay */}
       <WelcomeOverlay 
-        isVisible={showWelcome} 
+        isVisible={showWelcome && !isLoading} 
         onClose={() => setShowWelcome(false)} 
       />
+
+      {/* Settings Panel */}
+      <SettingsPanel />
 
       {/* Navigation Hint */}
       <div 
         className={`absolute bottom-8 left-1/2 transform -translate-x-1/2 transition-all duration-1000 ${
-          showWelcome ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
+          showWelcome || isLoading ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
         }`}
-        style={{ transitionDelay: showWelcome ? '0ms' : '500ms' }}
+        style={{ transitionDelay: showWelcome || isLoading ? '0ms' : '500ms' }}
       >
         <div 
           className="px-6 py-3 rounded-full text-white/80 text-center backdrop-blur-sm border border-white/10"
@@ -351,9 +331,9 @@ const Index = () => {
       {/* Glassmorphism Navigation */}
       <nav 
         className={`absolute top-8 right-8 transition-all duration-1000 ${
-          showWelcome ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
+          showWelcome || isLoading ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
         }`}
-        style={{ transitionDelay: showWelcome ? '0ms' : '700ms' }}
+        style={{ transitionDelay: showWelcome || isLoading ? '0ms' : '700ms' }}
       >
         <div 
           className="flex space-x-4 px-4 py-2 rounded-full backdrop-blur-sm border border-white/10"
@@ -376,9 +356,9 @@ const Index = () => {
       {/* Language Toggle */}
       <div 
         className={`absolute top-8 left-8 transition-all duration-1000 ${
-          showWelcome ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
+          showWelcome || isLoading ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
         }`}
-        style={{ transitionDelay: showWelcome ? '0ms' : '900ms' }}
+        style={{ transitionDelay: showWelcome || isLoading ? '0ms' : '900ms' }}
       >
         <div 
           className="flex space-x-2 px-3 py-2 rounded-full backdrop-blur-sm border border-white/10"
@@ -386,11 +366,21 @@ const Index = () => {
             background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
           }}
         >
-          <button className="text-white/80 hover:text-white transition-colors px-2 py-1 rounded text-sm">
+          <button 
+            onClick={() => setLanguage('en')}
+            className={`px-2 py-1 rounded text-sm transition-colors ${
+              language === 'en' ? 'text-white bg-white/20' : 'text-white/80 hover:text-white'
+            }`}
+          >
             EN
           </button>
           <div className="w-px bg-white/20"></div>
-          <button className="text-white/80 hover:text-white transition-colors px-2 py-1 rounded text-sm">
+          <button 
+            onClick={() => setLanguage('ko')}
+            className={`px-2 py-1 rounded text-sm transition-colors ${
+              language === 'ko' ? 'text-white bg-white/20' : 'text-white/80 hover:text-white'
+            }`}
+          >
             한국어
           </button>
         </div>
