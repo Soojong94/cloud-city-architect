@@ -6,6 +6,8 @@ import * as THREE from 'three';
 const NaverCloudBuilding = ({ position, onClick }: { position: [number, number, number], onClick: () => void }) => {
   const [hovered, setHovered] = useState(false);
   
+  console.log('NaverCloudBuilding mounting with position:', position);
+  
   return (
     <group 
       position={position} 

@@ -8,6 +8,8 @@ import AWSBuilding from '../components/buildings/AWSBuilding';
 import KubernetesBuilding from '../components/buildings/KubernetesBuilding';
 import NaverCloudBuilding from '../components/buildings/NaverCloudBuilding';
 import KTCloudBuilding from '../components/buildings/KTCloudBuilding';
+import ThreeErrorBoundary from '../components/ThreeErrorBoundary';
+import TestScene from '../components/TestScene';
 
 // Ground component with subtle texture
 const Ground = () => {
@@ -59,10 +61,26 @@ const FloatingElement = ({ position, color, scale = 1 }: { position: [number, nu
 
 // 3D Scene component
 const Scene = () => {
+  const [useTestScene, setUseTestScene] = useState(false);
+  
+  console.log('Scene component mounting, useTestScene:', useTestScene);
+  
   const handleBuildingClick = (buildingName: string) => {
     console.log(`Clicked on ${buildingName} building`);
     // TODO: Add modal or info panel for each building
   };
+
+  // For debugging - you can toggle this in console: window.toggleTestScene()
+  useEffect(() => {
+    (window as any).toggleTestScene = () => {
+      setUseTestScene(prev => !prev);
+      console.log('Toggled test scene to:', !useTestScene);
+    };
+  }, [useTestScene]);
+
+  if (useTestScene) {
+    return <TestScene />;
+  }
 
   return (
     <>
@@ -89,12 +107,14 @@ const Scene = () => {
       {/* Ground */}
       <Ground />
       
-      {/* Buildings positioned in a circle */}
+      {/* Buildings positioned in a circle - start with just main building */}
       <MainBuilding 
         position={[0, 0, 0]} 
         onClick={() => handleBuildingClick('Main')} 
       />
       
+      {/* Gradually add other buildings - uncomment one by one for testing */}
+      {/*
       <AWSBuilding 
         position={[14, 0, 14]} 
         onClick={() => handleBuildingClick('AWS')} 
@@ -114,6 +134,7 @@ const Scene = () => {
         position={[-14, 0, -14]} 
         onClick={() => handleBuildingClick('KT Cloud')} 
       />
+      */}
       
       {/* Reduced floating elements to not interfere with buildings */}
       <FloatingElement position={[25, 8, 0]} color="#3b82f6" scale={0.6} />
@@ -174,6 +195,8 @@ const Index = () => {
   const [showWelcome, setShowWelcome] = useState(true);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  console.log('Index component mounting');
+
   useEffect(() => {
     // Auto-hide welcome overlay after 3 seconds
     const timer = setTimeout(() => {
@@ -185,26 +208,31 @@ const Index = () => {
 
   return (
     <div className="h-screen w-full overflow-hidden bg-gray-900 relative">
-      {/* 3D Canvas */}
-      <Canvas
-        shadows
-        camera={{ position: [25, 15, 25], fov: 60 }}
-        onCreated={() => setIsLoaded(true)}
-        className="absolute inset-0"
-      >
-        <Suspense fallback={null}>
-          <Scene />
-          <OrbitControls 
-            enablePan={true}
-            enableZoom={true}
-            enableRotate={true}
-            minDistance={15}
-            maxDistance={60}
-            maxPolarAngle={Math.PI / 2.2}
-            target={[0, 8, 0]}
-          />
-        </Suspense>
-      </Canvas>
+      {/* 3D Canvas with Error Boundary */}
+      <ThreeErrorBoundary>
+        <Canvas
+          shadows
+          camera={{ position: [25, 15, 25], fov: 60 }}
+          onCreated={() => {
+            console.log('Canvas created successfully');
+            setIsLoaded(true);
+          }}
+          className="absolute inset-0"
+        >
+          <Suspense fallback={null}>
+            <Scene />
+            <OrbitControls 
+              enablePan={true}
+              enableZoom={true}
+              enableRotate={true}
+              minDistance={15}
+              maxDistance={60}
+              maxPolarAngle={Math.PI / 2.2}
+              target={[0, 8, 0]}
+            />
+          </Suspense>
+        </Canvas>
+      </ThreeErrorBoundary>
 
       {/* Loading Screen */}
       {!isLoaded && <LoadingScreen />}

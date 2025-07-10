@@ -8,6 +8,8 @@ const MainBuilding = ({ position, onClick }: { position: [number, number, number
   const buildingRef = useRef<THREE.Group>(null);
   const ringRef = useRef<THREE.Mesh>(null);
   
+  console.log('MainBuilding mounting with position:', position);
+  
   useFrame((state) => {
     if (ringRef.current) {
       ringRef.current.rotation.y += 0.01;
@@ -68,14 +70,13 @@ const MainBuilding = ({ position, onClick }: { position: [number, number, number
         );
       })}
       
-      {/* Building title */}
+      {/* Building title - simplified without font prop */}
       <Text
         position={[0, 22, 0]}
         fontSize={1.2}
         color="#ffffff"
         anchorX="center"
         anchorY="middle"
-        font="/fonts/Inter-Bold.woff"
       >
         KSJ - Cloud Solutions Architect
       </Text>
