@@ -1,7 +1,6 @@
-
 import React, { Suspense, useState, useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Text, Box, Plane, Environment, PerspectiveCamera } from '@react-three/drei';
+import { OrbitControls, Text, Box, Plane, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 import MainBuilding from '../components/buildings/MainBuilding';
 import AWSBuilding from '../components/buildings/AWSBuilding';
@@ -9,7 +8,6 @@ import KubernetesBuilding from '../components/buildings/KubernetesBuilding';
 import NaverCloudBuilding from '../components/buildings/NaverCloudBuilding';
 import KTCloudBuilding from '../components/buildings/KTCloudBuilding';
 import ThreeErrorBoundary from '../components/ThreeErrorBoundary';
-import TestScene from '../components/TestScene';
 import InfoPanel from '../components/InfoPanel';
 import LoadingScreen from '../components/LoadingScreen';
 import SettingsPanel from '../components/SettingsPanel';
