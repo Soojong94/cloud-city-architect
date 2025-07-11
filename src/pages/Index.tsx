@@ -1,7 +1,7 @@
 
 import React, { Suspense, useState, useRef, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Text, Box, Plane, Environment, PerspectiveCamera, Fog } from '@react-three/drei';
+import { OrbitControls, Text, Box, Plane, Environment, PerspectiveCamera } from '@react-three/drei';
 import * as THREE from 'three';
 import MainBuilding from '../components/buildings/MainBuilding';
 import AWSBuilding from '../components/buildings/AWSBuilding';
@@ -75,7 +75,7 @@ const EnhancedScene = ({ onBuildingClick }: { onBuildingClick: (buildingName: st
   return (
     <>
       <Environment preset="night" />
-      <Fog attach="fog" args={['#1a1a2e', 30, 100]} />
+      <fog attach="fog" args={['#1a1a2e', 30, 100]} />
       
       {/* Enhanced Lighting */}
       <ambientLight intensity={0.4} />
